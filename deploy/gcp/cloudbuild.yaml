@@ -1,0 +1,28 @@
+# Builds Doop's image and deploys it to Cloud Run (docs/deploy-gcp.md).
+# Run by the Cloud Build trigger `doop-deploy` on a branch of hodl-doop.
+substitutions:
+  _REGION: us-east1
+  _IMAGE: ${_REGION}-docker.pkg.dev/${PROJECT_ID}/doop/doop:${SHORT_SHA}
+options:
+  logging: CLOUD_LOGGING_ONLY
+  dynamicSubstitutions: true
+timeout: 1800s
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args: ['build', '-t', '${_IMAGE}', '.']
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args: ['push', '${_IMAGE}']
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        sed -e 's|__IMAGE__|${_IMAGE}|g' -e 's|__PROJECT__|${PROJECT_ID}|g' -e 's|__REGION__|${_REGION}|g' \
+          deploy/gcp/service.yaml > /workspace/service.yaml
+        gcloud run services replace /workspace/service.yaml --region='${_REGION}'
+images:
+  - ${_IMAGE}
