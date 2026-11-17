@@ -45,6 +45,10 @@ spec:
               value: __URL__
             - name: SIGNUP_EMAIL_DOMAINS
               value: __SIGNUP_DOMAINS__
+            # Set by the load balancer to the client's address, so sign-in
+            # rate limits are per visitor.
+            - name: AUTH_CLIENT_IP_HEADER
+              value: x-client-ip
             # Uploads go to Cloud Storage through its S3-compatible API.
             - name: BUCKET
               value: __PROJECT__-doop-assets
