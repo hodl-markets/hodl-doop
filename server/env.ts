@@ -122,6 +122,9 @@ const schema = {
   /* unset in production = user credentials stored unencrypted (boot warns) */
   SECRETS_ENCRYPTION_KEYS: secretKeys({ default: [], devDefault: DEV_SECRET_KEYS }),
   TRUSTED_ORIGINS: list({ default: [] }),
+  /* a request header the proxy in front sets to the client's address alone;
+     unset = Better Auth reads X-Forwarded-For (server/auth.ts) */
+  AUTH_CLIENT_IP_HEADER: str({ default: undefined }),
   SIGNUP_EMAIL_DOMAINS: list({ default: [] }),
   ADMIN_EMAILS: list({ default: [] }),
   REQUIRE_EMAIL_VERIFICATION: bool({ default: true }),

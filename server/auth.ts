@@ -386,6 +386,15 @@ function buildAuth() {
           const origin = request?.headers.get('origin')
           return origin ? [origin] : []
         },
+    /* Rate limits key on the client's address. Better Auth trusts
+       X-Forwarded-For only when it holds one address, and a proxy that
+       appends to it (Google's load balancer adds the client and itself)
+       leaves every visitor in one shared bucket. AUTH_CLIENT_IP_HEADER names a
+       header that proxy sets to the client alone, replacing any value the
+       client sent, e.g. X-Client-IP from {client_ip_address}. */
+    ...(env.AUTH_CLIENT_IP_HEADER && {
+      advanced: { ipAddress: { ipAddressHeaders: [env.AUTH_CLIENT_IP_HEADER] } },
+    }),
     database: drizzleAdapter(db, { provider: 'pg', schema: authSchema }),
     /* Social providers, each absent unless its <PREFIX>_* pair is set.
        Google always sends email_verified; Microsoft sends it (or
