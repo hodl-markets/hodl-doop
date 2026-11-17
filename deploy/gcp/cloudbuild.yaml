@@ -33,5 +33,26 @@ steps:
         sed -e 's|__IMAGE__|${_IMAGE}|g' -e 's|__PROJECT__|${PROJECT_ID}|g' -e 's|__REGION__|${_REGION}|g' \
           deploy/gcp/service.yaml > /workspace/service.yaml
         gcloud run services replace /workspace/service.yaml --region='${_REGION}'
+  # Doop must run as one copy. Each revision keeps its own minimum of one
+  # instance, so a revision that no longer takes traffic keeps running, and
+  # keeps the WebSockets it holds, until it is deleted (seen on 2026-11-17).
+  # Deleting it shuts its instance down: Doop saves pending writes on SIGTERM,
+  # and open canvases reconnect to the new revision 1.2 s later.
+  - id: retire-old-revisions
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        # value() joins several revisions with ';'
+        serving=" $$(gcloud run services describe doop --region='${_REGION}' --format='value(status.traffic[].revisionName)' | tr ';' ' ') "
+        echo "serving:$$serving"
+        for rev in $$(gcloud run revisions list --service=doop --region='${_REGION}' --format='value(metadata.name)'); do
+          case "$$serving" in
+            *" $$rev "*) ;;
+            *) echo "deleting $$rev"; gcloud run revisions delete "$$rev" --region='${_REGION}' --quiet ;;
+          esac
+        done
 images:
   - ${_IMAGE}

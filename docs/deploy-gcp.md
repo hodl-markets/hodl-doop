@@ -161,7 +161,8 @@ gcloud builds submit --project=hodlmarkets-tools --region=us-east1 --config=depl
   --substitutions=_TAG="$(git rev-parse --short HEAD)"
 ```
 
-- The build runs as `doop-build`: it pushes the image, then `gcloud run services replace` applies `service.yaml`.
+- The build runs as `doop-build`: it pushes the image, then `gcloud run services replace` applies `service.yaml`, then
+  every revision that no longer takes traffic is deleted (below, "Deploys").
 - Whoever runs it needs `roles/cloudbuild.builds.editor`, `roles/iam.serviceAccountUser` on `doop-build`, and write
   access to the staging bucket.
 - `_TAG` is required, since `gcloud builds submit` sets no `SHORT_SHA`; the first step stops the build without it.
@@ -227,9 +228,18 @@ caveats above. The handbook records $2,000 of Google for Startups credit on a Cl
   but not this SDK's checksum headers; the two `AWS_*_CHECKSUM_*` variables are a precaution. If uploads fail, the
   fallback is a Cloudflare R2 bucket with the same variables.
 - **Exports.** Export a frame as PDF (Chromium in the container).
-- **Deploys.** Cloud Run lets requests in progress finish before shutdown and then sends SIGTERM, with 10 s before
-  SIGKILL ([container contract](https://cloud.google.com/run/docs/container-contract)). Doop saves pending writes and
-  exits on SIGTERM. Google does not say how long an old revision with open WebSockets keeps running; if both revisions
-  stay up for long, lower `timeoutSeconds`.
+- **Deploys.** Cloud Run sends SIGTERM to an instance it shuts down, with 10 s before SIGKILL
+  ([container contract](https://cloud.google.com/run/docs/container-contract)); Doop saves pending writes and exits
+  within 1.5 s (`server/index.ts`). Seen on the redeploy of 2026-11-17 (revision `doop-00002-k8d`):
+  - No downtime: a request to `/healthz` every second through the switch, 234 of 234 answered 200 (slowest 0.56 s).
+  - The new revision started at 06:37:28 UTC, passed its startup probe at 06:37:43 and served from 06:37:50.
+  - The old revision did not stop. Its minimum of one instance belongs to the revision (`minScale` in the template),
+    so it kept running with no traffic until deleted at 06:42:49, and a WebSocket opened on it at 06:32:43 stayed on
+    it until about 06:39:31, while new visitors reached the new revision: two copies of Doop at once.
+  - So the build's last step deletes every revision without traffic. That shuts the old instance down (SIGTERM above)
+    and closes its WebSockets; Doop's client reconnects 1.2 s later, to the new revision.
+  - Rollback: a deleted revision cannot be routed back to. Images stay in Artifact Registry by commit tag; deploy an
+    older one with `gcloud run services update doop --region=us-east1 --image=us-east1-docker.pkg.dev/hodlmarkets-tools/doop/doop:<tag>`,
+    then delete the revision it replaced.
 - **Organization policies.** If the organization restricts public access, `run.googleapis.com/invoker-iam-disabled`
   or the public load balancer may be refused; the error names the policy.
