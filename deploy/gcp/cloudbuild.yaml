@@ -1,14 +1,19 @@
 # Builds Doop's image and deploys it to Cloud Run.
-# Run by a Cloud Build trigger on a branch of this repository, with the
-# public address as _URL and the sign-up domain allowlist as _SIGNUP_DOMAINS.
+# Run from a checkout of this repository with `gcloud builds submit`, passing
+# the commit as _TAG, the public address as _URL and the sign-up domain
+# allowlist as _SIGNUP_DOMAINS. `gcloud builds submit` sets no SHORT_SHA, so
+# the tag is a substitution of its own.
 substitutions:
   _REGION: us-east1
+  _TAG: ''
   _URL: ''
   _SIGNUP_DOMAINS: ''
-  _IMAGE: ${_REGION}-docker.pkg.dev/${PROJECT_ID}/doop/doop:${SHORT_SHA}
+  _IMAGE: ${_REGION}-docker.pkg.dev/${PROJECT_ID}/doop/doop:${_TAG}
 options:
   logging: CLOUD_LOGGING_ONLY
   dynamicSubstitutions: true
+  # The client build (Vite) is the slow part; 8 vCPUs keep it to minutes.
+  machineType: E2_HIGHCPU_8
 timeout: 1800s
 steps:
   - id: check-inputs
@@ -17,6 +22,7 @@ steps:
     args:
       - -c
       - |
+        test -n "${_TAG}" || { echo "Pass the commit as _TAG: --substitutions=_TAG=<hash>"; exit 1; }
         test -n "${_URL}" || { echo "Pass the public address as _URL: --substitutions=_URL=https://<host>"; exit 1; }
         test -n "${_SIGNUP_DOMAINS}" || { echo "Pass the sign-up domains as _SIGNUP_DOMAINS: --substitutions=_SIGNUP_DOMAINS=<domain>"; exit 1; }
   - id: build
