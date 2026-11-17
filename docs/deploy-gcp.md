@@ -121,31 +121,51 @@ put doop-better-auth-secret "$(openssl rand -hex 32)"
 put doop-secrets-encryption-keys "k1:$(openssl rand -base64 32)"
 put doop-storage-access-key-id '<access ID from step 3>'
 put doop-storage-secret-access-key '<secret from step 3>'
-put doop-microsoft-client-id '<application (client) ID>'
-put doop-microsoft-client-secret '<client secret>'
-put doop-microsoft-tenant-id '<HODL directory (tenant) ID>'
+for s in doop-microsoft-client-id doop-microsoft-client-secret doop-microsoft-tenant-id; do
+  gcloud secrets create "$s" --replication-policy=automatic
+  gcloud secrets add-iam-policy-binding "$s" --member="serviceAccount:$RUN_SA" \
+    --role=roles/secretmanager.secretAccessor >/dev/null
+done
 ```
+
+- The three Microsoft secrets start empty. Add each value from step 4 in the console (Secret Manager, the secret, New
+  version), so it never passes through a terminal or a chat: the application (client) ID, the client secret, and
+  the HODL directory (tenant) ID.
 
 - `doop-better-auth-secret` must not change: it signs sessions and agent tokens, so a new value signs everyone out.
 - Losing `doop-secrets-encryption-keys` loses the model keys and tokens people connected (they reconnect).
 
-**6. Build trigger**
+**6. Build staging bucket**
 
-- Cloud Build, Repositories (2nd gen): link GitHub and pick `hodl-markets/hodl-doop`. This installs the Cloud Build
-  GitHub App, which an owner of the `hodl-markets` organization may have to approve.
-- Cloud Build, Triggers, Create, in `us-east1`: name `doop-deploy`, event "Manual invocation", the linked repository,
-  branch `main`, configuration file `deploy/gcp/cloudbuild.yaml`, service account `doop-build`.
-- Deploys are manual on purpose: `main` follows upstream Doop, and hodl-doop's CI does not run yet (GitHub Actions is
-  off on the repository).
+```bash
+gcloud storage buckets create "gs://$PROJECT-doop-build" --location="$REGION" \
+  --uniform-bucket-level-access --public-access-prevention
+gcloud storage buckets update "gs://$PROJECT-doop-build" \
+  --lifecycle-file=<(echo '{"rule":[{"action":{"type":"Delete"},"condition":{"age":7}}]}')
+gcloud storage buckets add-iam-policy-binding "gs://$PROJECT-doop-build" \
+  --member="serviceAccount:$BUILD_SA" --role=roles/storage.objectViewer
+```
+
+`gcloud builds submit` uploads the checkout here and `doop-build` reads it; uploads are deleted after 7 days. There is
+no Cloud Build trigger and no GitHub App. Deploys are manual on purpose: `main` follows upstream Doop, and hodl-doop's
+CI does not run yet (GitHub Actions is off on the repository).
 
 ## Deploy
 
+From a checkout of hodl-doop on the commit to deploy (normally `main`):
+
 ```bash
-gcloud builds triggers run doop-deploy --region=us-east1 --branch=main
+gcloud builds submit --project=hodlmarkets-tools --region=us-east1 --config=deploy/gcp/cloudbuild.yaml \
+  --service-account=projects/hodlmarkets-tools/serviceAccounts/doop-build@hodlmarkets-tools.iam.gserviceaccount.com \
+  --gcs-source-staging-dir=gs://hodlmarkets-tools-doop-build/source \
+  --substitutions=_TAG="$(git rev-parse --short HEAD)"
 ```
 
-The build pushes the image, then `gcloud run services replace` applies `service.yaml`. Migrations run when the server
-starts. The first deploy creates the service; the balancer below needs it to exist.
+- The build runs as `doop-build`: it pushes the image, then `gcloud run services replace` applies `service.yaml`.
+- Whoever runs it needs `roles/cloudbuild.builds.editor`, `roles/iam.serviceAccountUser` on `doop-build`, and write
+  access to the staging bucket.
+- `_TAG` is required, since `gcloud builds submit` sets no `SHORT_SHA`; the first step stops the build without it.
+- Migrations run when the server starts. The first deploy creates the service; the balancer below needs it to exist.
 
 ## The address (once, after the first deploy)
 
