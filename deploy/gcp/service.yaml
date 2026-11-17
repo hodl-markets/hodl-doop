@@ -1,0 +1,115 @@
+# Cloud Run service for HODL's Doop (docs/deploy-gcp.md). A template:
+# cloudbuild.yaml replaces __PROJECT__, __REGION__ and __IMAGE__, then runs
+# `gcloud run services replace`.
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: doop
+  annotations:
+    # Reached only through the load balancer at doop.hodlmarkets.com.
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    # Doop signs people in itself, so requests skip Cloud Run's IAM check.
+    run.googleapis.com/invoker-iam-disabled: 'true'
+spec:
+  template:
+    metadata:
+      annotations:
+        # Exactly one instance: Doop keeps canvases, WebSocket rooms and rate
+        # limits in process memory, so a second instance would split them.
+        autoscaling.knative.dev/minScale: '1'
+        autoscaling.knative.dev/maxScale: '1'
+        # CPU stays allocated between requests: Doop runs background work
+        # (automations, image descriptions, idle canvas eviction).
+        run.googleapis.com/cpu-throttling: 'false'
+        run.googleapis.com/execution-environment: gen2
+        run.googleapis.com/startup-cpu-boost: 'true'
+        run.googleapis.com/cloudsql-instances: __PROJECT__:__REGION__:doop-db
+    spec:
+      serviceAccountName: doop-run@__PROJECT__.iam.gserviceaccount.com
+      # WebSockets count as requests; one instance must hold every open canvas.
+      containerConcurrency: 1000
+      # The longest a WebSocket stays open; the client reconnects after 1.2 s.
+      timeoutSeconds: 3600
+      containers:
+        - image: __IMAGE__
+          ports:
+            - name: http1
+              containerPort: 4400
+          resources:
+            limits:
+              # Node plus the Chromium used for screenshots and PDF exports.
+              cpu: '1'
+              memory: 2Gi
+          env:
+            - name: BETTER_AUTH_URL
+              value: https://doop.hodlmarkets.com
+            - name: SIGNUP_EMAIL_DOMAINS
+              value: hodlmarkets.com
+            # Uploads go to Cloud Storage through its S3-compatible API.
+            - name: BUCKET
+              value: __PROJECT__-doop-assets
+            - name: ENDPOINT
+              value: https://storage.googleapis.com
+            - name: REGION
+              value: auto
+            # The AWS SDK then sends checksum headers only where S3 requires
+            # them, which avoids headers Cloud Storage may not accept.
+            - name: AWS_REQUEST_CHECKSUM_CALCULATION
+              value: WHEN_REQUIRED
+            - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+              value: WHEN_REQUIRED
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: doop-database-url
+                  key: latest
+            - name: BETTER_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: doop-better-auth-secret
+                  key: latest
+            - name: SECRETS_ENCRYPTION_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: doop-secrets-encryption-keys
+                  key: latest
+            - name: MICROSOFT_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: doop-microsoft-client-id
+                  key: latest
+            - name: MICROSOFT_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: doop-microsoft-client-secret
+                  key: latest
+            - name: MICROSOFT_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: doop-microsoft-tenant-id
+                  key: latest
+            - name: ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: doop-storage-access-key-id
+                  key: latest
+            - name: SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: doop-storage-secret-access-key
+                  key: latest
+          # Migrations run before the server listens, so allow 3 minutes.
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 4400
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 36
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 4400
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
