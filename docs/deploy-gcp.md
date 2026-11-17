@@ -186,6 +186,11 @@ gcloud compute addresses describe doop-ip --global --format='value(address)'
 
 - In Cloudflare DNS, add an A record `doop` with that IP, DNS only (grey cloud). The certificate is issued once the
   record resolves to the balancer; `gcloud compute ssl-certificates describe doop-cert --global` shows its status.
+- Add the record before creating the certificate if you can. On 2026-11-17 the certificate was created about 3
+  minutes before the record; its domain showed `FAILED_NOT_VISIBLE` for over half an hour. A second certificate for
+  the same domain, attached alongside, forces an immediate re-check
+  ([Google](https://docs.cloud.google.com/load-balancing/docs/ssl-certificates/google-managed-certs)): both were
+  active within 20 minutes, and the extra one was then detached and deleted.
 - Optional: a second forwarding rule on port 80 that redirects to HTTPS.
 
 ## After the first deploy
