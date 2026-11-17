@@ -174,7 +174,8 @@ gcloud builds submit --project=hodlmarkets-tools --region=us-east1 --config=depl
 gcloud compute addresses create doop-ip --global
 gcloud compute network-endpoint-groups create doop-neg --region="$REGION" \
   --network-endpoint-type=serverless --cloud-run-service=doop
-gcloud compute backend-services create doop-backend --global --load-balancing-scheme=EXTERNAL_MANAGED
+gcloud compute backend-services create doop-backend --global --load-balancing-scheme=EXTERNAL_MANAGED \
+  --custom-request-header='X-Client-IP:{client_ip_address}'
 gcloud compute backend-services add-backend doop-backend --global \
   --network-endpoint-group=doop-neg --network-endpoint-group-region="$REGION"
 gcloud compute url-maps create doop-lb --default-service=doop-backend
@@ -192,6 +193,13 @@ gcloud compute addresses describe doop-ip --global --format='value(address)'
   the same domain, attached alongside, forces an immediate re-check
   ([Google](https://docs.cloud.google.com/load-balancing/docs/ssl-certificates/google-managed-certs)): both were
   active within 20 minutes, and the extra one was then detached and deleted.
+- `X-Client-IP` carries the visitor's address to Doop (`AUTH_CLIENT_IP_HEADER` in `service.yaml`), so sign-in rate
+  limits are per visitor. The balancer appends to `X-Forwarded-For` (`[SUPPLIED_VALUE,]CLIENT_IP,LOAD_BALANCER_IP`,
+  [Google](https://docs.cloud.google.com/load-balancing/docs/https)), and Better Auth trusts that header only when it
+  holds one address; without `X-Client-IP` every visitor shared one bucket (seen on 2026-11-17). A custom header
+  replaces any value the client sent
+  ([Google](https://docs.cloud.google.com/load-balancing/docs/https/custom-headers)). `--custom-request-header` on
+  `backend-services update` replaces the whole list, so repeat it with any other header added later.
 - Optional: a second forwarding rule on port 80 that redirects to HTTPS.
 
 ## After the first deploy

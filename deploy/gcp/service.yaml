@@ -45,6 +45,10 @@ spec:
               value: https://doop.hodlmarkets.com
             - name: SIGNUP_EMAIL_DOMAINS
               value: hodlmarkets.com
+            # Set by the load balancer (doop-backend) to the client's address,
+            # so sign-in rate limits are per visitor (docs/deploy-gcp.md).
+            - name: AUTH_CLIENT_IP_HEADER
+              value: x-client-ip
             # Uploads go to Cloud Storage through its S3-compatible API.
             - name: BUCKET
               value: __PROJECT__-doop-assets
