@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { AgentIcon } from '@/components/AgentIcon'
 import { DoopMark, Logo } from '@/components/Logo'
+import { Wordmark } from '@/components/ui/wordmark'
 import { RadioTowerIcon, WebIcon } from '@/components/ui/icons'
 import { APP_ICON_BRANDS, AppIcon, BRANDS, BrandMark } from '@/components/ui/brand-mark'
 import { MetaTile } from '@/components/AutomateShell'
@@ -16,6 +17,7 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
+/** The HODL symbol (Logo, DoopMark) and the HODL Markets lockup (Wordmark). */
 export const Doop: Story = {
   render: () => (
     <div className="flex items-center gap-5">
@@ -23,16 +25,8 @@ export const Doop: Story = {
       <Logo className="size-[26px] rounded-row" />
       <DoopMark size={24} />
       <DoopMark size={13} />
-    </div>
-  ),
-}
-
-/** The Disc-D with its dot hopping: the home greeting's mark, and the loading mark. */
-export const DoopAnimated: Story = {
-  render: () => (
-    <div className="flex items-end gap-6 text-ink">
-      <DoopMark animated size={62} className="block" />
-      <DoopMark animated size={24} className="block" />
+      <Wordmark size="sm" />
+      <Wordmark />
     </div>
   ),
 }

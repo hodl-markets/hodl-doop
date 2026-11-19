@@ -53,7 +53,7 @@ function DashSidebar({
   )
 }
 
-/** The rail's top row: the Disc-D as the way home, and room after it for the
+/** The rail's top row: the HODL symbol as the way home, and room after it for the
  *  rail's own controls (search, hide). */
 function DashSidebarBrand({
   onHome = () => navigate('/'),

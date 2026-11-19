@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { DRAFT_OPTIONS, DRAFTS_STORAGE_KEY, isDraftCount, readStoredDrafts, type DraftCount } from '../lib/homePrompt'
 import { setPromptBoxHidden, usePromptBoxHidden } from '../lib/homePreferences'
-import { DoopMark } from './Logo'
+import { Logo } from './Logo'
 import { ModelPicker } from './ModelPicker'
 import { BrandMark } from './ui/brand-mark'
 import { IconButton } from './ui/icon-button'
@@ -35,7 +35,7 @@ import {
 import { useT, type PlainMessageKey } from '../lib/i18n'
 
 /**
- * The home page's front door: the hopping Disc-D, a greeting, a strip of
+ * The home page's front door: the HODL symbol, a greeting, a strip of
  * suggestion chips, the composer that starts a canvas from a prompt, and the
  * "connect your designs" bar under it — all over the brand's gradient wave.
  *
@@ -226,9 +226,7 @@ export function HomeHero({
       </div>
 
       <div className="relative px-4 pt-10 text-center md:pt-14">
-        <span className="mx-auto mb-4 block h-[52px] w-[40px] text-ink md:mb-5 md:h-[62px] md:w-[48px]">
-          <DoopMark animated size="fill" className="block" />
-        </span>
+        <Logo className="mx-auto mb-4 block size-12 md:mb-5 md:size-14" />
         <h1 className="font-hero text-title font-light leading-none md:text-display">
           {t('home.greeting')}
           {firstName ? ', ' : ''}

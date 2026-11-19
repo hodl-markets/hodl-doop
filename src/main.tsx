@@ -5,6 +5,7 @@ import { App } from './App'
 import { initDesktopShell } from './lib/desktop'
 import { TooltipProvider } from './components/ui/tooltip'
 import { UpdateCard } from './components/UpdateCard'
+import { InternalNotice } from './components/InternalNotice'
 import { initTheme } from './lib/theme'
 import { initLocale } from './lib/i18n'
 import { installTranslateGuard } from './lib/translateGuard'
@@ -21,6 +22,7 @@ void initLocale().then(() =>
       <TooltipProvider>
         <App />
         <UpdateCard />
+        <InternalNotice />
       </TooltipProvider>
     </React.StrictMode>,
   ),

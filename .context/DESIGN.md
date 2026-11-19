@@ -156,7 +156,7 @@ Each has a story.
   brand row itself, a rail toggle plus wordmark, whenever an `AppRail` is mounted, and the rail
   opens as a left drawer that closes on any pick) - surfaces and content. The rail is built from
   the same parts: `DashSidebar variant="rail"` (borderless, `bg-sub`, 236px), `DashSidebarBrand`
-  (the Disc-D home button, with the rail's own controls as children), `DashSectionLabel
+  (the HODL symbol as the home button, with the rail's own controls as children), `DashSectionLabel
 density="rail"` (the group caption with its chevron) and `DashNavItem density="rail"` (the 31px
   row; `as="div"` for a static row such as an agent, `count` for a mono number, `trailing` for
   anything else). `DashHeader variant="bare"` drops the fill and the rule on the rail pages.
@@ -192,8 +192,10 @@ density="rail"` (the group caption with its chevron) and `DashNavItem density="r
   the brand tile (23% corners, inset edge and soft drop) with its glyph at 56% (`claude`, `claude-code`, `openai`,
   `gemini`, `openrouter`, `deepseek`, `kimi`, `seedream`, `codex`, `cursor`, `mcp`, `headless`, `github`, `figma`, `photoshop`, `canva`, `website`, `live-app`, `pdf`, `png`, `svg`,
   `jpg`), 32px in a list row and 40px beside a modal title,
-  `Wordmark`, `Logo` / `DoopMark` (the bare Disc-D; `animated` hops its dot, as the home greeting
-  wears it), `icons.tsx` - identity. Feature tiles (`FigmaTile`, `MetaTile`, the integrations'
+  `Wordmark` (the HODL Markets lockup, 26px `sm` / 32px `md`), `Logo` (the HODL symbol, the official
+  black or white file by theme) / `DoopMark` (the same symbol as an inline glyph in the text colour),
+  all from `src/assets/brand/` (copied from the HODL Design System's Logos group; never recolour or
+  redraw them), `icons.tsx` - identity. Feature tiles (`FigmaTile`, `MetaTile`, the integrations'
   `Tile`s, `AgentIcon`) compose a `BrandMark`; nothing else inlines a logo path.
 - Editor chrome (`PropertyField`, `Toolbar`, `Panel`, `Menu`) - the canvas page's own set, still on
   exact pixel sizes until its pass. `Panel` has three surfaces: `floating` (an island over the

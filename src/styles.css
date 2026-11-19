@@ -393,6 +393,14 @@
        (spec reads this off html, Chrome historically off body — set both) */
     overscroll-behavior: none;
   }
+  /* the internal-use notice along the bottom (InternalNotice.tsx): the root,
+     and every fixed screen through this variable, leave its height free */
+  :root {
+    --app-inset-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  #root {
+    height: calc(100% - var(--app-inset-bottom));
+  }
   body {
     @apply bg-background font-sans text-foreground;
     overflow: hidden;
@@ -841,33 +849,12 @@ body:has([data-panel-resizing]) * {
 }
 
 /* ---- the signed-in home ----
-   The hero's three motions. The Disc-D's dot hops (the loading mark, with a
-   rest between hops); the gradient wave behind the composer is a strip of
+   The hero's two motions. The gradient wave behind the composer is a strip of
    blurred bars laid out twice and slid by one copy, so the loop is seamless,
    while each bar swells on its own clock; the suggestion chip that is "on"
    wears a beam — blurred colour blobs pinned just outside its edge, hue
    cycling and drifting, over a plain white pill. Registered properties let
    the blob offsets and the hue tween like any other value. */
-@keyframes disc-hop {
-  0%,
-  37.5%,
-  100% {
-    transform: translateY(0) scale(1, 1);
-  }
-  11.25% {
-    transform: translateY(-34px) scale(0.92, 1.08);
-  }
-  18.75% {
-    transform: translateY(0) scale(1.15, 0.85);
-  }
-  24.4% {
-    transform: translateY(-10px) scale(0.98, 1.02);
-  }
-  30% {
-    transform: translateY(0) scale(1.05, 0.95);
-  }
-}
-
 @keyframes wave-flow {
   from {
     transform: translate3d(0, 0, 0);

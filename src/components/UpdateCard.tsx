@@ -16,7 +16,7 @@ export function UpdateCard() {
   return (
     /* bottom right, just above the canvas's zoom pill (14px in, 36px tall),
        so it never covers the zoom or the getting-started card on the left */
-    <div aria-live="polite" className="fixed right-3.5 bottom-[58px] z-[80]">
+    <div aria-live="polite" className="fixed right-3.5 bottom-[calc(58px+var(--app-inset-bottom,0px))] z-[80]">
       {offer && <UpdateCardControls offer={offer} onLater={() => setOffer(null)} />}
     </div>
   )

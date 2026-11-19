@@ -48,7 +48,7 @@ export function TopBar({
   return <div data-slot="top-bar" className={cn(topBarVariants({ variant, className }))} {...props} />
 }
 
-/** The Doop mark at the left edge: the way back to the level above. */
+/** The HODL symbol at the left edge: the way back to the level above. */
 export function TopBarHome({ label, to }: { label: string; to: string }) {
   return (
     <Tooltip label={label} side="bottom" align="start">
