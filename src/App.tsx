@@ -234,14 +234,16 @@ export function App() {
       {/* --app-inset is the contract with fixed-position screens: the canvas
           workspace is `fixed inset-0` and ignores this padding, so it offsets
           itself by the same variable instead of hardcoding the banner height */}
-      <div className="h-dvh overflow-auto pt-14 [--app-inset:56px] sm:pt-10 sm:[--app-inset:40px]">{page}</div>
+      <div className="h-[calc(100dvh-var(--app-inset-bottom))] overflow-auto pt-14 [--app-inset:56px] sm:pt-10 sm:[--app-inset:40px]">
+        {page}
+      </div>
     </>
   ) : isDesktopShell() ? (
     /* the desktop shell's tab strip uses the same --app-inset contract as
        the banner: fixed screens (the canvas workspace) offset themselves */
     <>
       <DesktopTabs path={path} />
-      <div className="h-dvh overflow-auto pt-10 [--app-inset:40px]">{page}</div>
+      <div className="h-[calc(100dvh-var(--app-inset-bottom))] overflow-auto pt-10 [--app-inset:40px]">{page}</div>
     </>
   ) : (
     page

@@ -24,7 +24,11 @@ export function ServerSettings() {
   if (!canChooseServer()) return null
   return (
     <>
-      <IconButton aria-label={t('auth.serverSettings')} className="fixed bottom-3 left-3" onClick={() => setOpen(true)}>
+      <IconButton
+        aria-label={t('auth.serverSettings')}
+        className="fixed bottom-[calc(12px+var(--app-inset-bottom,0px))] left-3"
+        onClick={() => setOpen(true)}
+      >
         <GearIcon size="rail" />
       </IconButton>
       {open && <ServerModal onClose={() => setOpen(false)} />}

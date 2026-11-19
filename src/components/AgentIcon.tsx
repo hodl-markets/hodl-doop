@@ -1,4 +1,4 @@
-/** Brand icons for well-known agents; the Doop mark otherwise. The marks
+/** Brand icons for well-known agents; the HODL symbol (DoopMark) otherwise. The marks
  *  themselves come from the BrandMark registry — this only knows which agent
  *  name wears which brand. */
 
@@ -17,7 +17,7 @@ export function agentBrandOf(name: string): Extract<Brand, 'claude' | 'openai' |
 export function AgentIcon({ name, size = 13, color }: { name: string; size?: number; color?: string }) {
   const brand = agentBrandOf(name)
   /* Anything else is a Doop agent (the built-in roles, or an unknown MCP
-     client) and wears the brand's own mark, as on the marketing site. */
+     client) and wears the HODL symbol. */
   if (!brand) return <DoopMark size={size} color={color} />
   return <BrandMark brand={brand} size={size} color={color} className="mr-px inline-block align-[-2px]" />
 }

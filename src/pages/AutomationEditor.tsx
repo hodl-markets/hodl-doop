@@ -384,7 +384,7 @@ export function AutomationEditor({ automationId }: { automationId: string }) {
   const incomplete = incompleteRaw && incompleteText(t, incompleteRaw)
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-[var(--app-inset,0px)] flex flex-col">
+    <div className="fixed inset-x-0 bottom-[var(--app-inset-bottom,0px)] top-[var(--app-inset,0px)] flex flex-col">
       <TopBar>
         <div className="flex min-w-0 items-center gap-1.5 max-xs:basis-full">
           <TopBarHome label={t('rail.automations')} to="/automations" />

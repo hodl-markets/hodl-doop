@@ -424,7 +424,7 @@ data-doop-webfonts>` for the roster families the frame names and does not load i
   label key in the `actions` catalog, menu and section, chords, `edit`, `enabled`, `checked`,
   `run`), and the keyboard (`dispatchActionKey`, called first by `CanvasPage`'s keydown), the ⌘K
   palette (`CommandPalette.tsx`, cmdk through `ui/command.tsx`; text that names no command goes to
-  the agent's composer as a prompt), the main menu off the bar's Doop mark (`MainMenu.tsx`: Go to files, then File,
+  the agent's composer as a prompt), the main menu off the bar's HODL symbol (`MainMenu.tsx`: Go to files, then File,
   Edit, View, Object, Text, Arrange, Help) and the ⌃⇧? sheet (`ShortcutsSheet.tsx`) all read it.
   `CanvasPage` lends the registry its modals and panels as the `ActionHost`. Chords (`chords.ts`)
   are `mod` (⌘ on a Mac, Ctrl elsewhere), ⌥ chords by `code`, `macOnly` / `notMac` per platform (⌘Y
@@ -865,7 +865,7 @@ data-doop-webfonts>` for the roster families the frame names and does not load i
   not yet converted still render English.
 - Home (`src/pages/Home.tsx`, `src/components/HomeHero.tsx`): a 12.5px rail (canvases, workspaces,
   explore, resources, agents, an Ask Doop pill bound to ⌘/), Import + New canvas in the top bar, and
-  a hero over the brand's gradient wave: the hopping Disc-D, a greeting, a strip of suggestion chips
+  a hero over the brand's gradient wave: the HODL symbol, a greeting, a strip of suggestion chips
   (the "on" chip wears the drifting colour beam from `src/styles.css`) and a composer. A prompt makes
   a canvas named after it (`src/lib/homePrompt.ts`), queues it as the first board card asking for N
   drafts, and opens the canvas; a card that cannot queue rides along as the canvas composer's draft.
@@ -887,6 +887,13 @@ data-doop-webfonts>` for the roster families the frame names and does not load i
   blink its rows out, and fades only when collapsed or expanded. Home warms the Workspace page's
   detail while a workspace's canvases are in view (`src/lib/workspaceCache.ts`), so its panes draw on
   the first frame instead of a skeleton; the page refetches on arrival.
+- HODL branding (`src/components/Logo.tsx`, `src/components/ui/wordmark.tsx`, `src/assets/brand/`):
+  every Doop mark is the HODL symbol or the HODL Markets lockup, copied from the HODL Design System's
+  Logos group. `InternalNotice.tsx`, mounted in `main.tsx`, is a 24px strip on every screen saying
+  this is HODL's internal system (`ui.internalNotice`, a short form on phones). Its height is
+  `--app-inset-bottom` (`src/styles.css`, safe area included), the bottom twin of `--app-inset`:
+  `#root` is that much shorter, and every fixed screen or overlay anchored to the bottom (canvas,
+  automation editor, prototype player, sheets, toasts, the update card) offsets itself by it.
 
 ## 11. Developer Experience Tooling
 

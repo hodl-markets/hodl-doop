@@ -427,7 +427,7 @@ export function PrototypePlayer({
     <div
       ref={rootRef}
       /* below the shell's tab strip, by the --app-inset contract (App.tsx) */
-      className="fixed inset-x-0 bottom-0 top-[var(--app-inset,0px)] z-[80] overflow-hidden bg-code"
+      className="fixed inset-x-0 bottom-[var(--app-inset-bottom,0px)] top-[var(--app-inset,0px)] z-[80] overflow-hidden bg-code"
       role="dialog"
       aria-label={t('panels.protoAria', { name: shownFrame?.name ?? t('panels.protoMissingLower') })}
       data-prototype-player=""
