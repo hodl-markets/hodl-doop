@@ -173,17 +173,25 @@ describe.skipIf(!findBrowserPath())('prototype player', { timeout: 30_000 }, () 
     expect(await home.$('#go[data-v-proto-flash]')).not.toBeNull()
   })
 
-  it('sits below the app inset and rescales from its scaling menu', async () => {
-    await page.evaluate(() => document.documentElement.style.setProperty('--app-inset', '40px'))
+  it('sits between the app insets and rescales from its scaling menu', async () => {
+    await page.evaluate(() => {
+      document.documentElement.style.setProperty('--app-inset', '40px')
+      document.documentElement.style.setProperty('--app-inset-bottom', '24px')
+    })
     /* the scaling pick is kept in storage, which the file's pages share */
     try {
       await page.evaluate((canvas) => (window as unknown as Fixture).seed(canvas), CANVAS)
       await page.evaluate(() => (window as unknown as Fixture).play('home'))
       await screen('home')
-      expect(await page.$eval('[data-prototype-player]', (el) => el.getBoundingClientRect().top)).toBe(40)
+      const player = await page.$eval('[data-prototype-player]', (el) => {
+        const { top, bottom } = el.getBoundingClientRect()
+        return { top, bottom }
+      })
+      /* under the tab strip, above the internal-use notice */
+      expect(player).toEqual({ top: 40, bottom: 676 })
       const width = () => page.$eval('[data-proto-screen="home"] > div', (el) => el.getBoundingClientRect().width)
-      /* 1000 × 660 fits the 400 × 300 frame at 2.2× */
-      expect(await width()).toBe(880)
+      /* 1000 × 636 fits the 400 × 300 frame at 2.12× */
+      expect(await width()).toBe(848)
 
       await page.click('[aria-label="Scaling"]')
       await page.waitForSelector('[data-proto-menu]')
@@ -264,6 +272,8 @@ describe.skipIf(!findBrowserPath())('prototype player', { timeout: 30_000 }, () 
       await screen('big')
       return measure()
     }
+    /* the player fills the window here: no internal-use notice under it */
+    await page.evaluate(() => document.documentElement.style.setProperty('--app-inset-bottom', '0px'))
     try {
       await page.evaluate((canvas) => (window as unknown as Fixture).seed(canvas), big)
       /* 2000 × 1400 at 1× in a 1000 × 700 player: scrolled to the far corner */
