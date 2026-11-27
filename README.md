@@ -1,3 +1,9 @@
+> **This fork.** HODL Markets' fork of [Doop](https://github.com/doop-design/doop). It adds the templates in
+> [`deploy/gcp/`](deploy/gcp/), which run Doop on Google Cloud Run; the deploy is run by hand, and nothing deploys
+> from GitHub. Upstream's CI and CLA bot don't run here. The deploy runbook is in the HODL handbook, private to the
+> HODL team: [`operations/doop.md`](https://github.com/hodl-markets/handbook/blob/main/operations/doop.md). Coding
+> agents: [AGENTS.md](AGENTS.md). The rest of this README is upstream's.
+
 <p align="center">
   <img src=".github/assets/banner.png" alt="Doop, the open-source alternative to Paper.design: a live canvas where Claude Code streams a pricing section while ChatGPT and Claude Code cursors move across the frames" width="100%">
 </p>
